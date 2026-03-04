@@ -12,6 +12,14 @@ agent = build_agent()
 class QuestionRequest(BaseModel):
     question: str
 
+@app.get("/")
+def home():
+    return {
+        "message": "Country Information AI Agent is running",
+        "docs": "/docs",
+        "usage": "Send a POST request to /ask with a question about a country"
+    }
+
 
 @app.post("/ask")
 def ask_country_agent(request: QuestionRequest):
