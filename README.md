@@ -55,20 +55,31 @@ The AI agent can answer questions such as:
 
 The system follows a **structured LangGraph workflow** rather than relying on a single prompt.
 
+```
 User Query
    │
    ▼
 FastAPI Endpoint (/ask)
    │
    ▼
-LangGraph Agent
+LangGraph Agent Workflow
    │
-   ├── Intent Extraction (Gemini)
-   ├── REST Countries API Tool
-   └── Answer Synthesis
+   ├── Intent Extraction Node
+   │       └─ Uses Gemini to identify:
+   │           • Country name
+   │           • Requested fields
+   │
+   ├── Country API Tool Node
+   │       └─ Calls REST Countries API
+   │           https://restcountries.com/v3.1/name/{country}
+   │
+   └── Answer Synthesis Node
+           └─ Extracts requested fields
+           └─ Formats human-readable response
    │
    ▼
-Response
+Final Response
+```
 
 ### Step 1 — Intent Identification
 
