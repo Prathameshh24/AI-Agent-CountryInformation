@@ -1,24 +1,34 @@
 # Country Information AI Agent
 
-An AI agent that answers questions about countries using public data from the REST Countries API.
+An AI agent that answers questions about countries using public data from the **REST Countries API**.
 
-The system is built using **LangGraph** to orchestrate an agent workflow consisting of:
+The system is implemented using **LangGraph** to orchestrate a multi-step agent workflow consisting of:
 
-1. **Intent / Field Identification**
-2. **Tool Invocation**
-3. **Answer Synthesis**
+* Intent / Field Identification
+* Tool Invocation
+* Answer Synthesis
 
-The agent is exposed as a **FastAPI service**, allowing users to query it through a simple API endpoint.
+The agent is exposed as a **FastAPI service** and deployed publicly so it can be tested through an API endpoint.
 
 ---
 
-# Example Questions
+# Live Demo
 
-The agent can answer questions such as:
+The application is hosted on **Render** and can be tested directly.
 
-* What is the population of Germany?
-* What currency does Japan use?
-* What is the capital and population of Brazil?
+API Homepage:
+
+https://country-ai-agent.onrender.com/docs
+
+You can test queries directly from the Swagger interface.
+
+Example query:
+
+```json
+{
+  "question": "What is the capital of Japan?"
+}
+```
 
 Example response:
 
@@ -30,35 +40,49 @@ Example response:
 
 ---
 
+# Example Questions
+
+The AI agent can answer questions such as:
+
+* What is the population of Germany?
+* What currency does Japan use?
+* What is the capital and population of Brazil?
+* What languages are spoken in Spain?
+
+---
+
 # System Architecture
 
-The agent follows a structured workflow using **LangGraph**.
+The system follows a **structured LangGraph workflow** rather than relying on a single prompt.
 
-```
-User Question
-      ↓
-Intent Extraction (Gemini)
-      ↓
-REST Countries API Tool
-      ↓
-Answer Synthesis
-      ↓
+User Query
+   │
+   ▼
+FastAPI Endpoint (/ask)
+   │
+   ▼
+LangGraph Agent
+   │
+   ├── Intent Extraction (Gemini)
+   ├── REST Countries API Tool
+   └── Answer Synthesis
+   │
+   ▼
 Response
-```
 
-### Workflow Steps
+### Step 1 — Intent Identification
 
-#### 1. Intent / Field Identification
+The user question is analyzed using the Gemini model to extract:
 
-Uses **Gemini** to extract:
-
-* country
+* country name
 * requested fields
 
 Example:
 
+Question:
+
 ```
-"What is the capital of Brazil?"
+What is the capital of Brazil?
 ```
 
 Extracted intent:
@@ -72,9 +96,9 @@ Extracted intent:
 
 ---
 
-#### 2. Tool Invocation
+### Step 2 — Tool Invocation
 
-The system queries the **REST Countries API**:
+The agent retrieves country information using the public REST Countries API.
 
 ```
 https://restcountries.com/v3.1/name/{country}
@@ -86,13 +110,19 @@ Example request:
 https://restcountries.com/v3.1/name/japan
 ```
 
-The API returns structured data about the country.
+The API returns structured data about the country including:
+
+* capital
+* population
+* currencies
+* region
+* languages
 
 ---
 
-#### 3. Answer Synthesis
+### Step 3 — Answer Synthesis
 
-Relevant information is extracted from the API response and converted into a human-readable answer.
+The relevant fields are extracted from the API response and formatted into a human-readable answer.
 
 Example:
 
@@ -110,6 +140,7 @@ The capital of Japan is Tokyo.
 * Gemini API
 * FastAPI
 * REST Countries API
+* Render (deployment)
 
 ---
 
@@ -121,29 +152,26 @@ country-ai-agent
 ├── app.py
 ├── requirements.txt
 ├── README.md
+├── .gitignore
 │
 ├── graph
 │   ├── agent_graph.py
 │   ├── nodes.py
 │   └── state.py
 │
-├── tools
-│   └── rest_countries.py
-│
-├── services
-│
-└── utils
+└── tools
+    └── rest_countries.py
 ```
 
-### Key Components
+### Component Description
 
-| File              | Purpose                               |
-| ----------------- | ------------------------------------- |
-| app.py            | FastAPI application                   |
-| agent_graph.py    | LangGraph workflow                    |
-| nodes.py          | Agent nodes (intent, tool, synthesis) |
-| state.py          | Shared agent state                    |
-| rest_countries.py | API integration                       |
+| File               | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| app.py             | FastAPI application and API endpoints            |
+| agent_graph.py     | LangGraph workflow definition                    |
+| nodes.py           | Agent nodes (intent, API call, answer synthesis) |
+| state.py           | Shared state across graph nodes                  |
+| rest_countries.py  | REST Countries API integration                   |
 
 ---
 
@@ -151,32 +179,32 @@ country-ai-agent
 
 ### 1. Clone the Repository
 
-```bash
-git clone https://github.com/your-username/country-ai-agent.git
+```
+git clone https://github.com/Prathameshh24/AI-Agent-CountryInformation.git
 cd country-ai-agent
 ```
 
 ---
 
-### 2. Create a Virtual Environment
+### 2. Create Virtual Environment
 
-```bash
+```
 python -m venv venv
 ```
 
 ---
 
-### 3. Activate the Environment
+### 3. Activate Virtual Environment
 
-Windows:
+Windows
 
-```bash
+```
 venv\Scripts\activate
 ```
 
-Mac / Linux:
+Mac / Linux
 
-```bash
+```
 source venv/bin/activate
 ```
 
@@ -184,85 +212,89 @@ source venv/bin/activate
 
 ### 4. Install Dependencies
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
 ---
 
-### 5. Set the Gemini API Key
+### 5. Add Gemini API Key
 
-Create a `.env` file in the project root.
+Create a `.env` file in the root directory.
 
 ```
 GOOGLE_API_KEY=your_gemini_api_key
 ```
 
-You can generate an API key from:
+Generate a key from:
 
-```
 https://aistudio.google.com/app/apikey
-```
 
 ---
 
-### 6. Run the API Server
+### 6. Start the API Server
 
-```bash
+```
 uvicorn app:app --reload
 ```
 
-The server will start at:
+Open the documentation:
 
 ```
-http://127.0.0.1:8000
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
 # API Usage
 
-### Endpoint
+Endpoint:
 
 ```
 POST /ask
 ```
 
-### Example Request
+Example Request
 
 ```json
 {
- "question": "What is the capital of Japan?"
+ "question": "What is the population of Germany?"
 }
 ```
 
-### Example Response
+Example Response
 
 ```json
 {
- "answer": "The capital of Japan is Tokyo."
+ "answer": "The population of Germany is 83,200,000."
 }
 ```
 
 ---
 
-# API Documentation
+# Root Endpoint
 
-FastAPI provides interactive documentation.
-
-Open in browser:
+The root endpoint confirms the service is running.
 
 ```
-http://127.0.0.1:8000/docs
+GET /
 ```
 
-This interface allows you to test the API directly.
+Example response:
+
+```json
+{
+ "message": "Country Information AI Agent is running",
+ "docs": "/docs",
+ "usage": "Send a POST request to /ask with a country question"
+}
+```
 
 ---
 
 # Error Handling
 
-The system handles invalid or unsupported inputs gracefully.
+The system gracefully handles invalid inputs.
 
 Example:
 
@@ -282,85 +314,63 @@ Response:
 
 ---
 
-# Production Considerations
+## Deployment
 
-The system was designed following production principles:
+The API is deployed using Render and is publicly accessible.
 
-### Modular Architecture
+Live API:
 
-Separate modules for agent logic, tools, and API service.
-
-### Stateless Design
-
-No database required.
-
-### API-Based Data Retrieval
-
-Answers are grounded using the REST Countries API.
-
-### Error Handling
-
-Handles missing data and invalid countries.
-
-### Extensibility
-
-Additional fields and tools can easily be added.
+https://country-ai-agent.onrender.com/docs
 
 ---
 
-# Deployment
+# Production Considerations
 
-The API can be deployed to cloud platforms such as:
+The project was designed with production principles:
 
-* Render
-* Railway
-* Fly.io
-
-Example deployed endpoint:
-
-```
-https://country-ai-agent.onrender.com/docs
-```
-
-This allows users to interact with the agent directly.
+* modular architecture
+* separation of agent nodes and tools
+* stateless service
+* external API integration
+* structured workflow using LangGraph
 
 ---
 
 # Limitations
 
-* Supports only the following fields:
+* Only supports fields:
 
   * capital
   * population
   * currency
   * region
   * languages
-* Dependent on REST Countries API availability
-* No caching implemented
-* No rate limiting implemented
+* Depends on availability of REST Countries API
+* No caching layer implemented
+* No request rate limiting
 
 ---
 
 # Possible Future Improvements
 
-* Add caching layer for API responses
-* Support additional country attributes
-* Implement monitoring and logging
-* Add request validation and rate limiting
-* Improve natural language response formatting
+* Add caching for API responses
+* Expand supported country attributes
+* Add monitoring and logging
+* Implement rate limiting
+* Improve response formatting using LLM summarization
 
 ---
 
-# Assignment Requirements Mapping
+# Assignment Requirement Mapping
 
-| Requirement             | Implementation                  |
-| ----------------------- | ------------------------------- |
-| LangGraph workflow      | Implemented in `agent_graph.py` |
-| Intent identification   | Gemini-based extraction         |
-| Tool invocation         | REST Countries API              |
-| Answer synthesis        | Structured data processing      |
-| Production-style design | Modular architecture + FastAPI  |
-| Hosted service          | Deployable FastAPI API          |
+| Requirement        | Implementation                  |
+| ------------------ | ------------------------------- |
+| LangGraph workflow | Implemented in `agent_graph.py` |
+| Intent extraction  | Gemini model                    |
+| Tool invocation    | REST Countries API              |
+| Answer synthesis   | Structured data processing      |
+| Production service | FastAPI deployment              |
+| Hosted API         | Render deployment               |
 
 ---
 
