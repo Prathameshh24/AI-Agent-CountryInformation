@@ -14,6 +14,10 @@ The agent is exposed as a **FastAPI service** and deployed publicly so it can be
 
 # Live Demo
 
+Video Walkthrough:
+
+https://www.loom.com/share/f00c6f60ac1c477fa9c81fa737c4c9cc
+
 The application is hosted on **Render** and can be tested directly.
 
 API Homepage:
