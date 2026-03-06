@@ -22,7 +22,7 @@ The application is hosted on **Render** and can be tested directly.
 
 API Homepage:
 
-https://country-ai-agent.onrender.com/docs
+https://ai-agent-countryinformation.onrender.com/docs
 
 You can test queries directly from the Swagger interface.
 
